@@ -2,15 +2,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/syscall.h>
-#include <fcntl.h>
 #include <errno.h>
 
-int main(int argc, char* argv[]) {
-  char* msg = "fisop\n";
 
-  // Abro un archivo y si no existe lo creo
-  int fd = open("hola.txt", O_CREAT | O_RDWR, 0644);
+int main(int argc, char* argv[]) {
+  int* a = malloc(sizeof(int));
   int i = fork();
+
+  *a = 5;
 
   if (i < 0) {
     printf("Error en fork! %d\n", i);
@@ -19,17 +18,16 @@ int main(int argc, char* argv[]) {
 
   if (i == 0) {
     printf("[hijo] mi pid es: %d\n", getpid());
-    write(fd, msg, 6);
-    close(fd);
+    printf("[hijo] a=%d\n", *a); //y, diria que aca imprime 5
+    printf("[hijo] puntero a 'a' = %p\n", a);
   } else {
+    *a = 6;
     printf("[padre] mi pid es: %d\n", getpid());
-    char* otroMsg = "posif\n";
-    write(fd, otroMsg, 6);
-    close(fd);
+    printf("[padre] a=%d\n", *a); //y aca 6
+    printf("[padre] puntero a 'a' = %p\n", a);
   }
-
+  free(a);
   printf("Terminando\n");
   exit(0);
 }
-
 
