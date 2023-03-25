@@ -13,10 +13,11 @@ void funcionRecursivaMagica(int pipeIzquierdo){
     int errorWrite = -1;
 
     int errorPrimo = read(pipeIzquierdo, &primo, sizeof(int));
-    if(primo == -1){
-        close(pipeIzquierdo);
+    if(errorPrimo <= 0){      //termine de leer del filtro izquierdo
+        close(pipeIzquierdo); //y no hago nada mas(condicion de corte)
         exit(0);
     }
+    
     printf("primo %i\n", primo);
     int pipeDerecho[2];
     int errorPipe = pipe(pipeDerecho);
@@ -26,7 +27,10 @@ void funcionRecursivaMagica(int pipeIzquierdo){
     }
     
     if(numeroFork == 0){
+        close(pipeDerecho[1]);
+        close(pipeIzquierdo);
         funcionRecursivaMagica(pipeDerecho[0]);
+        close(pipeDerecho[0]);
     }else{
         close(pipeDerecho[0]);
         while(read(pipeIzquierdo, &numero, sizeof(int))){
@@ -34,12 +38,13 @@ void funcionRecursivaMagica(int pipeIzquierdo){
                 errorWrite = write(pipeDerecho[1], &numero, sizeof(int));
                 if(errorWrite < 0) printf("Se rompio todo \n");
             }
+            if(numero == -1) printf("llegue aca\n");
         }
-        int matate = -1;
-        write(pipeDerecho[1, &matate, sizeof(int)]);
         close(pipeDerecho[1]);
+        close(pipeIzquierdo);
         wait(NULL);
     }
+    exit(0);
 }
 
 int main(int argc, char* argv[]){
@@ -58,6 +63,7 @@ int main(int argc, char* argv[]){
     }
 
     if (numeroFork == 0){
+        close(fdsPrimerPipe[1]);
         funcionRecursivaMagica(fdsPrimerPipe[0]);
         printf("F\n");
     }else{
@@ -66,8 +72,13 @@ int main(int argc, char* argv[]){
             if(errorWrite < 0) printf("Se rompio todo \n");
         }
        close(fdsPrimerPipe[1]);
+       wait(NULL);
 
     }
     close(fdsPrimerPipe[0]);
+    fclose(stdin);
+    fclose(stdout);
+    fclose(stderr);
+
     return 0;
 }
